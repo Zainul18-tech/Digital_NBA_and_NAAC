@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital NBA & NAAC</title>
+</head>
+
+<body>
+
+    <h1>Digital NBA & NAAC</h1>
+    <h2>Login</h2>
+
+    <form id="loginForm">
+        <input
+            type="text"
+            id="username"
+            placeholder="Username"
+            required
+        >
+
+        <br><br>
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            required
+        >
+
+        <br><br>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <p id="message"></p>
+
+    <script>
+        const loginForm = document.getElementById("loginForm");
+        const message = document.getElementById("message");
+
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch(
+                    "http://127.0.0.1:8000/api/auth/token/",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            password: password
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem("access_token", data.access);
+                    localStorage.setItem("refresh_token", data.refresh);
+
+                    message.textContent = "Login successful!";
+                } else {
+                    message.textContent =
+                        data.detail || "Login failed.";
+                }
+
+            } catch (error) {
+                message.textContent =
+                    "Unable to connect to Django server.";
+                console.error(error);
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Digital NBA & NAAC - Dashboard</title>
+</head>
+
+<body>
+
+    <h1>Digital NBA & NAAC</h1>
+
+    <h2>Assessment Dashboard</h2>
+
+    <p id="message">Loading assessments...</p>
+
+    <div id="assessments"></div>
+
+    <script>
+
+        const message = document.getElementById("message");
+        const assessmentsContainer =
+            document.getElementById("assessments");
+
+        const accessToken =
+            localStorage.getItem("access_token");
+
+
+        // Check whether the user is logged in
+        if (!accessToken) {
+
+            message.textContent =
+                "You are not logged in. Please login first.";
+
+        } else {
+
+            loadAssessments();
+
+        }
+
+
+        async function loadAssessments() {
+
+            try {
+
+                const response = await fetch(
+                    "http://127.0.0.1:8000/api/accreditation/assessments/",
+                    {
+                        method: "GET",
+
+                        headers: {
+                            "Authorization":
+                                "Bearer " + accessToken
+                        }
+                    }
+                );
+
+
+                const data = await response.json();
+
+
+                if (!response.ok) {
+
+                    message.textContent =
+                        data.detail || "Failed to load assessments.";
+
+                    return;
+
+                }
+
+
+                message.textContent =
+                    "Assessments loaded successfully.";
+
+
+                if (data.length === 0) {
+
+                    assessmentsContainer.innerHTML =
+                        "<p>No assessments found.</p>";
+
+                    return;
+
+                }
+
+
+                data.forEach(function (assessment) {
+
+                    const card =
+                        document.createElement("div");
+
+
+                    card.innerHTML = `
+                        <h3>Assessment #${assessment.id}</h3>
+
+                        <p>
+                            <strong>Program ID:</strong>
+                            ${assessment.program}
+                        </p>
+
+                        <p>
+                            <strong>Academic Year ID:</strong>
+                            ${assessment.academic_year}
+                        </p>
+
+                        <p>
+                            <strong>Status:</strong>
+                            ${assessment.status}
+                        </p>
+
+                        <hr>
+                    `;
+
+
+                    assessmentsContainer.appendChild(card);
+
+                });
+
+            } catch (error) {
+
+                console.error(error);
+
+                message.textContent =
+                    "Unable to connect to Django server.";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
